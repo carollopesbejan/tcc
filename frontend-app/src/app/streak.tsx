@@ -1,23 +1,58 @@
-import { CheckCircle2, Flame } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const COLORS = { background: '#1C2833', card: '#243342', muted: '#253545', foreground: '#E8ECEF', mutedForeground: '#7F9AAA', primary: '#3A7D5E', primaryFg: '#F7F9F9', accent: '#E8970D', ok: '#82E0AA', border: 'rgba(232, 236, 239, 0.08)' };
-const ACHIEVEMENTS = [{ emoji: '🔥', label: 'Primeira chama', desc: '1 dia consecutivo', unlockAt: 1 }, { emoji: '⚡', label: 'Semana perfeita', desc: '7 dias seguidos', unlockAt: 7 }, { emoji: '🏆', label: 'Quinzena', desc: '14 dias seguidos', unlockAt: 14 }];
-const STRINGS = { streakTitle: 'Ofensiva', streakSub: 'Seu histórico de dias consecutivos' };
-const CURRENT_STREAK = 14;
-
 export default function StreakScreen() {
-  return <SafeAreaView style={styles.screen}><StatusBar style="light" /><ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-    <View><Text style={styles.title}>{STRINGS.streakTitle}</Text><Text style={styles.subtitle}>{STRINGS.streakSub}</Text></View>
-    <LinearGradient colors={['#1e4535', '#132b1f']} style={styles.bigStreakCard}><View style={styles.streakHeading}><Flame size={32} color={COLORS.accent} fill={COLORS.accent} /><View style={styles.numberLine}><Text style={styles.number}>72</Text><Text style={styles.days}>dias</Text></View></View><WeekStrip /><Text style={styles.weekCaption}>Esta semana</Text></LinearGradient>
-    <View style={styles.levelCard}><View style={styles.levelRow}><Text style={styles.levelName}>Iniciante</Text><Text style={styles.levelCount}>Nível 1 de 4</Text></View><View style={styles.xpTrack}><LinearGradient colors={['#3A7D5E', '#52A87C']} style={styles.xpFill} /></View><Text style={styles.xpText}>120 / 500 XP</Text></View>
-    <View style={styles.achievementList}>{ACHIEVEMENTS.map((achievement) => <Achievement key={achievement.label} {...achievement} />)}</View>
-  </ScrollView></SafeAreaView>;
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Streak</Text>
+        <Text style={styles.subtitle}>Sua sequência de hábitos</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.bigNumber}>14</Text>
+          <Text style={styles.cardText}>dias consecutivos</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
-function WeekStrip() { return <View style={styles.weekStrip}>{['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => <View key={`${day}-${index}`} style={[styles.weekCell, index < 5 && styles.weekCellDone]}><Text style={styles.weekDay}>{day}</Text><Text style={styles.weekMark}>{index < 5 ? '✓' : '·'}</Text></View>)}</View>; }
-function Achievement({ emoji, label, desc, unlockAt }: (typeof ACHIEVEMENTS)[number]) { const unlocked = CURRENT_STREAK >= unlockAt; return <View style={[styles.achievement, !unlocked && styles.achievementLocked]}><Text style={styles.achievementEmoji}>{emoji}</Text><View style={styles.achievementCopy}><Text style={styles.achievementLabel}>{label}</Text><Text style={styles.achievementDesc}>{desc}</Text></View>{unlocked && <CheckCircle2 size={20} color={COLORS.ok} />}</View>; }
-
-const styles = StyleSheet.create({ screen: { flex: 1, backgroundColor: COLORS.background }, scrollContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 20 }, title: { color: COLORS.foreground, fontSize: 24, lineHeight: 30, fontWeight: '900', fontFamily: 'Nunito' }, subtitle: { color: COLORS.mutedForeground, fontSize: 12, fontWeight: '400', fontFamily: 'Nunito', marginTop: 4 }, bigStreakCard: { borderRadius: 24, padding: 24, overflow: 'hidden', gap: 16 }, streakHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 }, numberLine: { flexDirection: 'row', alignItems: 'baseline', gap: 8 }, number: { color: '#FFFFFF', fontSize: 72, lineHeight: 78, fontWeight: '900', fontFamily: 'Nunito' }, days: { color: 'rgba(130,224,170,0.60)', fontSize: 24, fontWeight: '700', fontFamily: 'Nunito' }, weekStrip: { flexDirection: 'row', gap: 6 }, weekCell: { flex: 1, minHeight: 58, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center', gap: 4 }, weekCellDone: { backgroundColor: 'rgba(130,224,170,0.18)' }, weekDay: { color: COLORS.mutedForeground, fontSize: 11, fontWeight: '700', fontFamily: 'Nunito' }, weekMark: { color: COLORS.ok, fontSize: 18, fontWeight: '900' }, weekCaption: { color: COLORS.mutedForeground, fontSize: 11, fontFamily: 'Nunito' }, levelCard: { backgroundColor: COLORS.card, borderRadius: 16, padding: 16, gap: 10, borderWidth: 1, borderColor: COLORS.border }, levelRow: { flexDirection: 'row', justifyContent: 'space-between' }, levelName: { color: COLORS.foreground, fontSize: 14, fontWeight: '900', fontFamily: 'Nunito' }, levelCount: { color: COLORS.mutedForeground, fontSize: 12, fontFamily: 'Nunito' }, xpTrack: { height: 10, borderRadius: 5, overflow: 'hidden', backgroundColor: COLORS.muted }, xpFill: { height: '100%', width: '24%', borderRadius: 5 }, xpText: { color: COLORS.mutedForeground, fontSize: 10, fontFamily: 'Nunito' }, achievementList: { gap: 10 }, achievement: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 16, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border }, achievementLocked: { opacity: 0.55 }, achievementEmoji: { fontSize: 26 }, achievementCopy: { flex: 1, gap: 3 }, achievementLabel: { color: COLORS.foreground, fontSize: 12, fontWeight: '900', fontFamily: 'Nunito' }, achievementDesc: { color: COLORS.mutedForeground, fontSize: 10, fontWeight: '400', fontFamily: 'Nunito' } });
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  container: {
+    flexGrow: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  title: {
+    color: '#f8fafc',
+    fontSize: 32,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: '#cbd5e1',
+    fontSize: 16,
+    marginBottom: 24,
+  },
+  card: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: '#334155',
+    alignItems: 'center',
+  },
+  bigNumber: {
+    color: '#f59e0b',
+    fontSize: 52,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  cardText: {
+    color: '#e2e8f0',
+    fontSize: 16,
+  },
+});
