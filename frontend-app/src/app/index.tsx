@@ -129,7 +129,6 @@ function Header() {
           <MaterialCommunityIcons name="fire" size={14} color={COLORS.accent} />
           <Text style={styles.streakPillText}>11 dias</Text>
         </Pressable>
-
         <Pressable style={styles.searchButton}>
           <Ionicons name="search" size={18} color={COLORS.foreground} />
         </Pressable>
@@ -213,7 +212,6 @@ function StorageSection({ section }: { section: StorageSectionData }) {
           <Text style={styles.storageEmoji}>{section.emoji}</Text>
           <Text style={styles.storageTitle}>{section.title}</Text>
         </View>
-
         <View style={styles.storageChip}>
           <Text style={styles.storageChipText}>{section.chipLabel}</Text>
         </View>
@@ -311,14 +309,14 @@ function NavItem({
   isActive?: boolean;
 }) {
   return (
-    <Pressable style={styles.navItem}>
+    <View style={styles.navItem}>
       <Ionicons
         name={icon}
         size={19}
         color={isActive ? COLORS.foreground : COLORS.white40}
       />
       <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{label}</Text>
-    </Pressable>
+    </View>
   );
 }
 
