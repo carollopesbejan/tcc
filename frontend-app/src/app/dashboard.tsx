@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -6,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -97,6 +99,8 @@ const STORAGE_SECTIONS: StorageSectionData[] = [
 ];
 
 export default function DashboardScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="light" />
@@ -110,7 +114,7 @@ export default function DashboardScreen() {
         <StorageSectionList sections={STORAGE_SECTIONS} />
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNavigation router={router} />
     </SafeAreaView>
   );
 }
@@ -257,19 +261,46 @@ function FoodSlot({ item }: { item: FoodItem }) {
   );
 }
 
-function BottomNavigation() {
+function BottomNavigation({ router }: { router: ReturnType<typeof useRouter> }) {
   return (
     <View style={styles.navWrapper}>
       <View style={styles.navBackground}>
-        <NavItem icon="home" label="Inicio" isActive />
-        <NavItem icon="flash" label="Ofensiva" />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/')}
+        >
+          <NavItem icon="home" label="Inicio" isActive />
+        </TouchableOpacity>
 
-        <Pressable style={styles.fabButton}>
-          <Ionicons name="add" size={30} color={COLORS.primaryFg} />
-        </Pressable>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/streak')}
+        >
+          <NavItem icon="flash" label="Ofensiva" />
+        </TouchableOpacity>
 
-        <NavItem icon="restaurant" label="Alimentos" />
-        <NavItem icon="person" label="Perfil" />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/add')}
+        >
+          <Pressable style={styles.fabButton}>
+            <Ionicons name="add" size={30} color={COLORS.primaryFg} />
+          </Pressable>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/pantry')}
+        >
+          <NavItem icon="restaurant" label="Alimentos" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => router.push('/profile')}
+        >
+          <NavItem icon="person" label="Perfil" />
+        </TouchableOpacity>
       </View>
     </View>
   );
