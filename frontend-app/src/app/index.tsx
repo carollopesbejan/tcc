@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -7,7 +7,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -99,8 +98,6 @@ const STORAGE_SECTIONS: StorageSectionData[] = [
 ];
 
 export default function HomeScreen() {
-  const router = useRouter();
-
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="light" />
@@ -114,7 +111,7 @@ export default function HomeScreen() {
         <StorageSectionList sections={STORAGE_SECTIONS} />
       </ScrollView>
 
-      <BottomNavigation router={router} />
+      <BottomNavigation />
     </SafeAreaView>
   );
 }
@@ -261,46 +258,44 @@ function FoodSlot({ item }: { item: FoodItem }) {
   );
 }
 
-function BottomNavigation({ router }: { router: ReturnType<typeof useRouter> }) {
+function BottomNavigation() {
   return (
-    <View style={styles.navWrapper}>
+    <View style={styles.navWrapper} pointerEvents="auto">
       <View style={styles.navBackground}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/')}
-        >
-          <NavItem icon="home" label="Inicio" isActive />
-        </TouchableOpacity>
+        {/* HOME */}
+        <Link href="/" asChild>
+          <Pressable>
+            <NavItem icon="home" label="Inicio" isActive />
+          </Pressable>
+        </Link>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/streak')}
-        >
-          <NavItem icon="flash" label="Ofensiva" />
-        </TouchableOpacity>
+        {/* OFENSIVA */}
+        <Link href="/streak" asChild>
+          <Pressable>
+            <NavItem icon="flash" label="Ofensiva" />
+          </Pressable>
+        </Link>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/add')}
-        >
+        {/* BOTÃO + ADICIONAR */}
+        <Link href="/add" asChild>
           <Pressable style={styles.fabButton}>
             <Ionicons name="add" size={30} color={COLORS.primaryFg} />
           </Pressable>
-        </TouchableOpacity>
+        </Link>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/pantry')}
-        >
-          <NavItem icon="restaurant" label="Alimentos" />
-        </TouchableOpacity>
+        {/* ALIMENTOS */}
+        <Link href="/pantry" asChild>
+          <Pressable>
+            <NavItem icon="restaurant" label="Alimentos" />
+          </Pressable>
+        </Link>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => router.push('/profile')}
-        >
-          <NavItem icon="person" label="Perfil" />
-        </TouchableOpacity>
+        {/* PERFIL */}
+        <Link href="/profile" asChild>
+          <Pressable>
+            <NavItem icon="person" label="Perfil" />
+          </Pressable>
+        </Link>
       </View>
     </View>
   );
@@ -558,6 +553,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 10,
     alignItems: 'center',
+    zIndex: 1000,
+    pointerEvents: 'box-none',
   },
   navBackground: {
     width: '93%',
@@ -571,11 +568,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+    zIndex: 1001,
+    pointerEvents: 'auto',
   },
   navItem: {
     alignItems: 'center',
     gap: 4,
     minWidth: 54,
+    pointerEvents: 'auto',
   },
   navLabel: {
     color: COLORS.white40,
@@ -601,5 +601,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
+    pointerEvents: 'auto',
   },
 });
