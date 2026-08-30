@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -194,6 +195,7 @@ const MOCK_FOODS: FoodItemData[] = [
 ];
 
 export default function PantryScreen() {
+  const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
   const filteredFoods = MOCK_FOODS.filter((food) => {
@@ -204,10 +206,12 @@ export default function PantryScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.screenTitle}>Alimentos</Text>
-        <Text style={styles.screenSubtitle}>
-          {MOCK_FOODS.length} itens na dispensa
-        </Text>
+        <View>
+          <Text style={styles.screenTitle}>Alimentos</Text>
+          <Text style={styles.screenSubtitle}>
+            {MOCK_FOODS.length} itens na dispensa
+          </Text>
+        </View>
       </View>
 
       <FilterChipsRow
@@ -282,8 +286,10 @@ interface FoodListRowProps {
 }
 
 function FoodListRow({ food }: FoodListRowProps) {
+  const router = useRouter();
+  
   return (
-    <Pressable style={styles.foodListRow}>
+    <Pressable style={styles.foodListRow} onPress={() => router.push(`/`)}>
       <EmojiAvatar emoji={food.emoji} />
 
       <NameBlock

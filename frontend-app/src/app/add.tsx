@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { ArrowLeft, Calendar, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -45,6 +46,7 @@ const LOCATIONS = [
 const UNITS = ['g', 'kg', 'ml', 'l', 'un', 'lata', 'pct'];
 
 export default function AddScreen() {
+  const router = useRouter();
   const [foodName, setFoodName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export default function AddScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-        <ScreenHeader />
+        <ScreenHeader onBackPress={() => router.back()} />
 
         {showSuccess && <SuccessBanner />}
 
@@ -142,10 +144,10 @@ export default function AddScreen() {
   );
 }
 
-function ScreenHeader() {
+function ScreenHeader({ onBackPress }: { onBackPress: () => void }) {
   return (
     <View style={styles.header}>
-      <Pressable style={styles.backButton}>
+      <Pressable style={styles.backButton} onPress={onBackPress}>
         <ArrowLeft size={24} color={COLORS.foreground} />
       </Pressable>
       <Text style={styles.screenTitle}>Adicionar</Text>
