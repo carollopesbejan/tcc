@@ -14,11 +14,11 @@ const COLORS = {
 };
 
 // 🔴 COLOQUE SUA URL DO CODESPACES AQUI (Sem a barra / no final)
-const API_BASE_URL = 'https://symmetrical-trout-59g6jjpqprqh459v-8000.app.github.dev'
+const API_BASE_URL = 'http://192.168.0.125:8000';
 
 // --- TIPOS ---
 type FoodItem = {
-  id: string;
+  id: number
   name: string;
   category: string;
   location: string;
@@ -116,7 +116,7 @@ export default function PantryScreen() {
       ) : (
         <Animated.FlatList
           data={filteredItems}
-          keyExtractor={item => item.id}
+          keyExtractor={item => String(item.id)}
           contentContainerStyle={styles.listContent}
           itemLayoutAnimation={LinearTransition.springify()}
           renderItem={({ item }) => <FoodListRow item={item} />}

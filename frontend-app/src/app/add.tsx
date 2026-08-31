@@ -13,8 +13,7 @@ import {
   Alert,
 } from 'react-native';
 
-const API_BASE_URL = 'https://symmetrical-trout-59g6jjpqprqh459v-8000.app.github.dev';
-
+const API_BASE_URL = 'http://192.168.0.125:8000';
 const COLORS = {
   background: '#1C2833',
   card: '#243342',
