@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -10,7 +11,21 @@ import {
   View,
 } from 'react-native';
 
+// 🔴 COLOQUE SUA URL DO CODESPACES AQUI (Sem a barra / no final)
+const API_BASE_URL = 'http://192.168.0.125:8000';
+
 type FoodStatus = 'ok' | 'urgent' | 'expired';
+
+type APIFoodItem = {
+  id?: number;
+  name: string;
+  category: string;
+  location: string;
+  quantity: number;
+  unit: string;
+  expiryDate: string;
+  emoji: string;
+};
 
 type FoodItem = {
   id: string;
@@ -55,49 +70,108 @@ const COLORS = {
   pantryBorder: '#B07040',
 } as const;
 
-const STATUS_SUMMARY = {
-  ok: 14,
-  urgent: 5,
-  expired: 2,
+const LOCATION_CONFIG: Record<string, { title: string; emoji: string; cardColor: string; borderColor: string }> = {
+  'Geladeira': { title: 'Geladeira', emoji: '🧊', cardColor: COLORS.fridgeCard, borderColor: COLORS.fridgeBorder },
+  'Freezer': { title: 'Freezer', emoji: '❄️', cardColor: COLORS.fridgeCard, borderColor: COLORS.fridgeBorder },
+  'Fruteira': { title: 'Fruteira', emoji: '🍑', cardColor: COLORS.pantryCard, borderColor: COLORS.pantryBorder },
+  'Armário': { title: 'Armário', emoji: '🚪', cardColor: COLORS.pantryCard, borderColor: COLORS.pantryBorder },
+  'Despensa': { title: 'Despensa', emoji: '🧺', cardColor: COLORS.pantryCard, borderColor: COLORS.pantryBorder },
 };
 
-const STORAGE_SECTIONS: StorageSectionData[] = [
-  {
-    id: 'fridge',
-    title: 'Geladeira',
-    emoji: '🧊',
-    chipLabel: '6 itens',
-    cardColor: COLORS.fridgeCard,
-    borderColor: COLORS.fridgeBorder,
-    items: [
-      { id: 'f-1', slot: 1, emoji: '🥛', name: 'Leite', status: 'urgent', expiryProgress: 0.24 },
-      { id: 'f-2', slot: 2, emoji: '🍓', name: 'Morangos', status: 'expired', expiryProgress: 0.08 },
-      { id: 'f-3', slot: 3, emoji: '🧀', name: 'Queijo', status: 'ok', expiryProgress: 0.82 },
-      { id: 'f-4', slot: 4, emoji: '🥬', name: 'Alface', status: 'urgent', expiryProgress: 0.3 },
-      { id: 'f-5', slot: 5, emoji: '🍗', name: 'Frango', status: 'ok', expiryProgress: 0.72 },
-      { id: 'f-6', slot: 6, emoji: '🧈', name: 'Manteiga', status: 'ok', expiryProgress: 0.9 },
-    ],
-  },
-  {
-    id: 'pantry',
-    title: 'Despensa',
-    emoji: '🧺',
-    chipLabel: '7 itens',
-    cardColor: COLORS.pantryCard,
-    borderColor: COLORS.pantryBorder,
-    items: [
-      { id: 'p-1', slot: 1, emoji: '🍝', name: 'Macarrao', status: 'ok', expiryProgress: 0.95 },
-      { id: 'p-2', slot: 2, emoji: '🥫', name: 'Molho', status: 'urgent', expiryProgress: 0.4 },
-      { id: 'p-3', slot: 3, emoji: '🌾', name: 'Arroz', status: 'ok', expiryProgress: 0.87 },
-      { id: 'p-4', slot: 4, emoji: '🫘', name: 'Feijao', status: 'ok', expiryProgress: 0.8 },
-      { id: 'p-5', slot: 5, emoji: '🫒', name: 'Azeitona', status: 'expired', expiryProgress: 0.18 },
-      { id: 'p-6', slot: 6, emoji: '🍪', name: 'Biscoitos', status: 'ok', expiryProgress: 0.67 },
-      { id: 'p-7', slot: 7, emoji: '🍯', name: 'Mel', status: 'ok', expiryProgress: 0.74 },
-    ],
-  },
-];
+// --- HELPER FUNCTIONS ---
+
+const getDaysUntilExpiry = (dateString: string): number => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(dateString);
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+const getStatus = (days: number): FoodStatus => {
+  if (days < 0) return 'expired';
+  if (days <= 3) return 'urgent';
+  return 'ok';
+};
+
+// --- MAIN COMPONENT ---
 
 export default function HomeScreen() {
+  const [apiItems, setApiItems] = useState<APIFoodItem[]>([]);
+  const [statusSummary, setStatusSummary] = useState({ ok: 0, urgent: 0, expired: 0 });
+  const [storageSections, setStorageSections] = useState<StorageSectionData[]>([]);
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/items`);
+      const data = await response.json();
+      setApiItems(data);
+      processItems(data);
+    } catch (error) {
+      console.error('Erro ao buscar itens:', error);
+    }
+  };
+
+  const processItems = (items: APIFoodItem[]) => {
+    // 1. Calcular status para cada item
+    const processedItems = items.map(item => ({
+      ...item,
+      days: getDaysUntilExpiry(item.expiryDate),
+    }));
+
+    // 2. Calcular STATUS_SUMMARY
+    const summary = { ok: 0, urgent: 0, expired: 0 };
+    processedItems.forEach(item => {
+      const status = getStatus(item.days);
+      summary[status]++;
+    });
+    setStatusSummary(summary);
+
+    // 3. Agrupar por location e criar STORAGE_SECTIONS
+    const groupedByLocation: Record<string, APIFoodItem[]> = {};
+    processedItems.forEach(item => {
+      if (!groupedByLocation[item.location]) {
+        groupedByLocation[item.location] = [];
+      }
+      groupedByLocation[item.location].push(item);
+    });
+
+    // 4. Criar STORAGE_SECTIONS apenas para locations com itens
+    const sections: StorageSectionData[] = Object.entries(groupedByLocation)
+      .map(([location, locationItems]) => {
+        const config = LOCATION_CONFIG[location] || { 
+          title: location, 
+          emoji: '📦', 
+          cardColor: COLORS.card, 
+          borderColor: COLORS.border 
+        };
+
+        return {
+          id: location.toLowerCase().replace(/\s+/g, '-'),
+          title: config.title,
+          emoji: config.emoji,
+          chipLabel: `${locationItems.length} item${locationItems.length !== 1 ? 'ns' : ''}`,
+          cardColor: config.cardColor,
+          borderColor: config.borderColor,
+          items: locationItems.map((item, index) => ({
+            id: `${item.id || index}`,
+            slot: index + 1,
+            emoji: item.emoji,
+            name: item.name,
+            status: getStatus(getDaysUntilExpiry(item.expiryDate)),
+            expiryProgress: Math.max(0, Math.min(1, getDaysUntilExpiry(item.expiryDate) / 15)),
+          })),
+        };
+      })
+      .sort((a, b) => b.items.length - a.items.length); // Ordena por quantidade de itens
+
+    setStorageSections(sections);
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="light" />
@@ -107,8 +181,8 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <Header />
-        <StatsSegmentedBar summary={STATUS_SUMMARY} />
-        <StorageSectionList sections={STORAGE_SECTIONS} />
+        <StatsSegmentedBar summary={statusSummary} />
+        <StorageSectionList sections={storageSections} />
       </ScrollView>
 
       <BottomNavigation />
