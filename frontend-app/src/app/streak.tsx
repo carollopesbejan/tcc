@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
@@ -14,11 +14,18 @@ const COLORS = {
   border: 'rgba(232,236,239,0.08)',
 };
 
-let streak: number = 17;
-let items: any[] = [];
-let expiredCount: number = 0;
-
 export default function StreakScreen() {
+  const [streak, setStreak] = useState<number>(17);
+  const [items, setItems] = useState<any[]>([]);
+  const [expiredCount, setExpiredCount] = useState<number>(0);
+
+  useEffect(() => {
+    // TODO: Substituir por fetch real quando DB estiver pronto
+    setStreak(14);
+    setItems([]);
+    setExpiredCount(0);
+  }, []);
+
   return (
     <SafeAreaView style={styles.screen}>
       <Animated.ScrollView 
@@ -27,9 +34,9 @@ export default function StreakScreen() {
         showsVerticalScrollIndicator={false}
       >
         <PageHeader />
-        <BigStreakCard />
-        <LevelCard />
-        <AchievementsSection />
+        <BigStreakCard streak={streak} />
+        <LevelCard streak={streak} />
+        <AchievementsSection streak={streak} expiredCount={expiredCount} items={items} />
       </Animated.ScrollView>
     </SafeAreaView>
   );
@@ -44,7 +51,7 @@ function PageHeader() {
   );
 }
 
-function BigStreakCard() {
+function BigStreakCard({ streak }: { streak: number }) {
   const weekDays = ["S", "T", "Q", "Q", "S", "S", "D"];
   const todayIdx = (new Date().getDay() + 6) % 7;
   
@@ -100,7 +107,7 @@ function BigStreakCard() {
   );
 }
 
-function LevelCard() {
+function LevelCard({ streak }: { streak: number }) {
   const levelNames = ["Iniciante", "Dedicado", "Expert", "Mestre"];
   const levelEmoji = ["🌱", "⚡", "🏆", "👑"];
   const thresholds = [7, 14, 30, 30];
@@ -113,7 +120,7 @@ function LevelCard() {
 
   useEffect(() => {
     progress.value = withDelay(300, withTiming(progressPercent, { duration: 1000 }));
-  }, []);
+  }, [progressPercent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: `${progress.value}%`,
@@ -145,7 +152,7 @@ function LevelCard() {
   );
 }
 
-function AchievementsSection() {
+function AchievementsSection({ streak, expiredCount, items }: { streak: number; expiredCount: number; items: any[] }) {
   const rawAchievements = [
     { emoji: "🔥", label: "Primeira chama", desc: "1 dia consecutivo", target: 1, current: streak, unlocked: streak >= 1 },
     { emoji: "⚡", label: "Semana perfeita", desc: "7 dias seguidos", target: 7, current: streak, unlocked: streak >= 7 },

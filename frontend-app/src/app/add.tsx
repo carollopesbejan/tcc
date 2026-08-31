@@ -10,7 +10,10 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
 } from 'react-native';
+
+const API_BASE_URL = 'https://symmetrical-trout-59g6jjpqprqh459v-8000.app.github.dev';
 
 const COLORS = {
   background: '#1C2833',
@@ -56,17 +59,52 @@ export default function AddScreen() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showUnitPicker, setShowUnitPicker] = useState(false);
 
-  const handleAdd = () => {
-    if (foodName && selectedCategory && selectedLocation && quantity && selectedDate) {
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        setFoodName('');
-        setSelectedCategory(null);
-        setSelectedLocation(null);
-        setQuantity('');
-        setSelectedUnit('un');
-      }, 2000);
+  const handleAdd = async () => {
+    if (!foodName || !selectedCategory || !selectedLocation || !quantity || !selectedDate) {
+      Alert.alert('Erro', 'Preencha todos os campos');
+      return;
+    }
+
+    try {
+      const categoryName = selectedCategory.split('🍎')[0].split('🥛')[0].split('🍗')[0].split('☕')[0].split('🌾')[0].split('🍪')[0].split('📦')[0].trim();
+      const locationName = selectedLocation.split('🧊')[0].split('❄️')[0].split('🍑')[0].split('🚪')[0].split('📦')[0].trim();
+      const emoji = selectedCategory.match(/[\p{Emoji}]/gu)?.[0] || '📦';
+
+      const payload = {
+        name: foodName,
+        category: categoryName,
+        location: locationName,
+        quantity: parseFloat(quantity),
+        unit: selectedUnit,
+        expiryDate: selectedDate.toISOString().split('T')[0],
+        emoji: emoji,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          setFoodName('');
+          setSelectedCategory(null);
+          setSelectedLocation(null);
+          setQuantity('');
+          setSelectedUnit('un');
+          setSelectedDate(new Date());
+        }, 2000);
+      } else {
+        Alert.alert('Erro', 'Falha ao adicionar alimento');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao conectar com o servidor');
+      console.error(error);
     }
   };
 

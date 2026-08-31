@@ -1,39 +1,40 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from database import SessionLocal
+import models
 from schemas import FoodItem
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 router = APIRouter()
 
-MOCK_ITEMS = [
-    FoodItem(
-        id="1",
-        name="Maçã",
-        category="Frutas",
-        location="Fruteira",
-        quantity=5,
-        unit="un",
-        expiryDate="2026-09-10",
-        emoji="🍎",
-    ),
-    FoodItem(
-        id="2",
-        name="Leite",
-        category="Laticínios",
-        location="Geladeira",
-        quantity=1,
-        unit="l",
-        expiryDate="2026-09-05",
-        emoji="🥛",
-    ),
-]
-
 
 @router.get("/items", response_model=list[FoodItem])
-async def list_items() -> list[FoodItem]:
-    return MOCK_ITEMS
+async def list_items(db: Session = Depends(get_db)) -> list[FoodItem]:
+    items = db.query(models.FoodItemDB).all()
+    return items
 
 
-@router.post("/items")
-async def create_item(item: FoodItem):
-    payload = item.model_dump() if hasattr(item, "model_dump") else item.dict()
-    return {"status": "sucesso", "item": payload}
+@router.post("/items", response_model=FoodItem)
+async def create_item(item: FoodItem, db: Session = Depends(get_db)):
+    db_item = models.FoodItemDB(
+        name=item.name,
+        category=item.category,
+        location=item.location,
+        quantity=item.quantity,
+        unit=item.unit,
+        expiryDate=item.expiryDate,
+        emoji=item.emoji,
+    )
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
